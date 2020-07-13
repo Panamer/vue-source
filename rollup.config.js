@@ -8,7 +8,7 @@ export default {
         format: 'umd', // amd commonjs规范  默认将打包后的结果挂载到window上
         file: 'dist/vue.js', // 打包出的vue.js 文件  new Vue
         name: 'Vue',
-        sourcemap: true
+        sourcemap: true     // 方便源码调试
     },
     plugins: [
         babel({ // 解析es6 -》 es5
@@ -17,7 +17,7 @@ export default {
         serve({ // 开启本地服务
             open: true,
             openPage: '/public/index.html',
-            port: 3000,
+            port: 8080,
             contentBase: ''
         })
     ]

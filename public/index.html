@@ -7,14 +7,20 @@
 </head>
 <body>
     <script src="../dist/vue.js"></script>
+    <div id="app"> {{msg}}</div>
 </body>
 </html>
 
-<li key="j">橘子</li>
-<li key="x">香蕉</li>
-<li key="p">苹果</li>
-
-
-<li key="j">橘子</li>
-<li key="x">香蕉</li>
-<li key="p">苹果</li>
+<script>
+    const app = new Vue({
+        // 数据会被观测 响应式数据: 更改数据 视图变化
+        // 对 对象的所有属性 使用definePrototype 进行自定义 get set
+        el: '#app',
+        data: {
+            msg: {
+                a: 1
+            }
+        }
+    })
+    app.msg
+</script>
