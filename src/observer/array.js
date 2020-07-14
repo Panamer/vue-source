@@ -23,7 +23,7 @@ let methods = [
 methods.forEach(method => {
     arrayMethods[method] = function (...args) {
         const ob = this.__ob__
-        let result = oldArrayMethods[method].apply(ob, args)
+        let result = oldArrayMethods[method].apply(this, args)
         let inserted;
         switch (method) {
             case 'push':
@@ -37,7 +37,7 @@ methods.forEach(method => {
                 break;
         }
         inserted && ob.observeArray(inserted)
-
+        console.log('数组被观测了', inserted);
         return result;
     }
 })

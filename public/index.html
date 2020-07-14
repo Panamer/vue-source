@@ -17,10 +17,11 @@
         // 对 对象的所有属性 使用definePrototype 进行自定义 get set
         el: '#app',
         data: {
-            msg: {
-                a: 1
-            }
+            msg: 1,
+            list: [1,2,3]
         }
     })
-    app.msg
+    app.msg = 100
+    app.list.push(4)
+    
 </script>

@@ -55,13 +55,14 @@ function defineReactive(data, key, value) {
     observe(value) // value可能还是一个对象 递归循环检测一下
     Object.defineProperty(data, key, {
         get() {
-            console.log('get----');
+            console.log('对象的get方法');
             return value
         },
         set(newVal) {
             if (newVal === value) return
             observe(newVal)
             value = newVal
+            console.log('对象的set方法');
         }
     })
 }
@@ -69,7 +70,7 @@ function defineReactive(data, key, value) {
 
 export function observe(data) {
     // 如果不是对象 就不用做响应式处理
-    if (isObject(data)) {
+    if (!isObject(data)) {
         return;
     }
     // 如果有__ob__属性    表示观测过 也直接跳出

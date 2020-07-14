@@ -61,7 +61,7 @@
         args[_key] = arguments[_key];
       }
 
-      var result = oldArrayMethods[method].apply(ob, args);
+      var result = oldArrayMethods[method].apply(this, args);
       var inserted;
 
       switch (method) {
@@ -76,6 +76,7 @@
       }
 
       inserted && ob.observeArray(inserted);
+      console.log('数组被观测了', inserted);
       return result;
     };
   });
@@ -159,20 +160,21 @@
 
     Object.defineProperty(data, key, {
       get: function get() {
-        console.log('get----');
+        console.log('对象的get方法');
         return value;
       },
       set: function set(newVal) {
         if (newVal === value) return;
         observe(newVal);
         value = newVal;
+        console.log('对象的set方法');
       }
     });
   }
 
   function observe(data) {
     // 如果不是对象 就不用做响应式处理
-    if (isObject(data)) {
+    if (!isObject(data)) {
       return;
     } // 如果有__ob__属性    表示观测过 也直接跳出
 
