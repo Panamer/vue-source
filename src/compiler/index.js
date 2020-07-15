@@ -1,33 +1,23 @@
 import {parseHTML} from './parser.js'
 import {generate} from './generator.js';
-export function compileToFunctions(template){
-    // console.log(template)
-    // 实现模板的编译
 
-    let ast = parseHTML(template);
+// template => render函数  实现模版的编译
+export function compileToFunctions(template) {
+    // 根据模版 通过正则匹配  解析字符串 生成ast抽象语法树  是个object  不同于vnode 表面和vnode很像
+    let ast = parseHTML(template)
 
-    // 代码生成
-    // template => render 函数
-
+    // 核心是字符串拼接 解析ast
+    let code = generate(ast)
+    code = `with(this) { \r\nreturn ${code} \r\n}`
     /**
-     * react 
      * render(){ 
         * with(this){
         *  return _c('div',{id:app,style:{color:red}},_c('span',undefined,_v("helloworld"+_s(msg)) ))
         * }
      * }
-     * 
+     * 把字符串转换成函数
      */
-    // 核心就是字符串拼接
-    let code = generate(ast); // 代码生成 =》 拼接字符串
-    
-    code = `with(this){ \r\nreturn ${code} \r\n}`;
-
-    let render = new Function(code); // 相当于给字符串变成了函数
-
-
-    // 注释节点 自闭和标签 事件绑定 @click  class slot插槽
-
+    const render = new Function(code)
     return render;
     // 模板编译原理 
     // 1.先把我们的代码转化成ast语法树 （1）  parser 解析  (正则)

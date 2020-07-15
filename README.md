@@ -30,8 +30,14 @@ initProvide(vm)
 callHook(vm, 'created')
 
 initState里有个observe, 处理对象、数组的响应式
-处理对象的方式: 利用Object.defineProperty 自定义get set 拦截对象上的所以属性 达到观测的目的
+处理对象的方式: 利用Object.defineProperty 重新定义get set 拦截对象上的所以属性 达到观测的目的
 处理数组的方式: 利用函数劫持的特性 对数组的7个方法进行重写 数组新增时可以被观测到
 
 下面在数据响应式的基础上  收集依赖  触发依赖  更新视图  达到数据变化 视图自动更新的目的
+
+
+模版编译: 解析器、优化器、代码生成器               render返回vnode 虚拟节点
+把字符串模版转换成render函数经历了哪些步骤? 
+1、实现一个解析器, 生成ATS: 用树结构描述标签语法(不同于vnode: 用js对象描述html)
+
 ```
