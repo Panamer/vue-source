@@ -132,7 +132,9 @@
       }
 
       inserted && ob.observeArray(inserted);
-      console.log('数组被观测了', inserted);
+      console.log('数组被观测了', inserted); // 数组的依赖更新
+
+      ob.dep.notify();
       return result;
     };
   });
@@ -270,11 +272,14 @@
     function Observe(data) {
       _classCallCheck(this, Observe);
 
+      // 专门为数组设计的 所以 数组的dep是存在Observe类上的
+      this.dep = new Dep();
       /**
        * 1、添加一个__ob__响应式标示,代表data已经被观测过, 对象数组都有
        * 2、data.__ob__  = this
        * 在数据上就可以获取到ob属性, 指代的是 observe实例
        */
+
       Object.defineProperty(data, '__ob__', {
         enumerable: false,
         configurable: false,
@@ -324,6 +329,9 @@
 
 
   function defineReactive(data, key, value) {
+    // 这是个observe实例呀 上面有个dep属性呀
+    // 注意啦 数组的dep在Observe类上 是个动态属性  对象的dep在defineReactive里 是局部变量
+    var childOb = observe(value);
     observe(value); // value可能还是一个对象 递归循环检测一下
 
     var dep = new Dep();
@@ -334,6 +342,15 @@
 
         if (Dep.target) {
           dep.depend();
+
+          if (childOb) {
+            childOb.dep.depend(); // 收集数组依赖
+
+            if (Array.isArray(value)) {
+              // 如果内部还是数组
+              dependArray(value); // 不停的进行依赖收集
+            }
+          }
         }
 
         return value;
@@ -347,6 +364,17 @@
         dep.notify();
       }
     });
+  }
+
+  function dependArray(value) {
+    for (var i = 0; i < value.length; i++) {
+      var current = value[i];
+      current.__ob__ && current.__ob__.dep.depend();
+
+      if (Array.isArray(current)) {
+        dependArray(current);
+      }
+    }
   }
 
   function observe(data) {

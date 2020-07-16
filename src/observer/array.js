@@ -38,6 +38,8 @@ methods.forEach(method => {
         }
         inserted && ob.observeArray(inserted)
         console.log('数组被观测了', inserted);
+        // 数组的依赖更新
+        ob.dep.notify()
         return result;
     }
 })
