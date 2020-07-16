@@ -1,16 +1,17 @@
 import { initState } from './state'
 import { compileToFunctions } from './compiler/index.js'
-import { mountComponent } from './lifecycle.js'
+import { mountComponent, callHook } from './lifecycle.js'
 export function initMixin(Vue) {
     Vue.prototype._init = function (options) {
 
         const vm = this;
         // Vue 内的$options 就是用户传入的所有参数
         vm.$options = options
-
+        callHook(vm, 'beforeCreate')
         // 初始化状态
         initState(vm)
-
+        
+        callHook(vm, 'created')
 
         // 根据模版进行渲染, 用户传入了el属性才执行挂载 $mount  否则要手动 
         if (vm.$options.el) {
