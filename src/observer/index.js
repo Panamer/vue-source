@@ -1,5 +1,6 @@
 import { arrayMethods } from "./array";
 import {isObject} from '../utils.js'
+import Dep from "./dep";
 
 /**
  * 为什么vue用function 这里用class? 
@@ -53,9 +54,17 @@ class Observe {
 
 function defineReactive(data, key, value) {
     observe(value) // value可能还是一个对象 递归循环检测一下
+
+    let dep = new Dep();
+
     Object.defineProperty(data, key, {
         get() {
             console.log('对象的get方法');
+            // 用户取值的时候 会触发get 给这个属性添加一个dep属性， 让这个dep去收集watcher
+            // 每个属性都有一个自己的dep
+            if (Dep.target) {
+                dep.depend()
+            }
             return value
         },
         set(newVal) {
@@ -63,6 +72,9 @@ function defineReactive(data, key, value) {
             observe(newVal)
             value = newVal
             console.log('对象的set方法');
+
+            // 当数据更新后 执行当前dep对应的watcher  
+            dep.notify()
         }
     })
 }

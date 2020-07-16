@@ -1,16 +1,10 @@
 import Watcher from './observer/watcher';
 import { patch } from './vdom/patch';
 export function lifeCycleMixin(Vue) {
-    Vue.prototype._update = function (vnode) {
+    Vue.prototype._update = function(vnode){
+        // 传入vnode 得到真实dom  挂在vm.$el 上
         const vm = this;
-
-        // 将虚拟节点 变成 真实节点 替换掉$el
-
-        // 后续 dom diff 也会执行此方法
-
-
-        vm.$el = patch(vm.$el, vnode);
-
+        vm.$el = patch(vm.$el, vnode)
     }
 }
 export function mountComponent(vm, el) {

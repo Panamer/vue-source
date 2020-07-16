@@ -149,7 +149,6 @@ function updateChildren(parent, oldChildren, newChildren) {
     // 循环时尽量采用唯一的标识 作为key 如果用索引（例如倒叙 会采用索引来复用，不够准确） 如果是静态数据 （你爱用啥用啥）
 
 
-    // 下周六 开班第一天 
 
 }
 export function createElm(vnode) { // 需要递归创建

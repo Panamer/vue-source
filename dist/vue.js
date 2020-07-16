@@ -149,6 +149,150 @@
     return _typeof(obj) === 'object' && obj !== null;
   }
 
+  var has = {}; // vue源码里有的时候去重用的是set 有的时候用的是对象来实现的去重
+
+  var queue = []; // 这个队列是否正在等待更新
+
+  function flushSchedulerQueue() {
+    for (var i = 0; i < queue.length; i++) {
+      queue[i].run();
+    }
+
+    queue = [];
+    has = {};
+  }
+
+  function queueWatcher(watcher) {
+    var id = watcher.id;
+
+    if (has[id] == null) {
+      has[id] = true; // 如果没有注册过这个watcher，就注册这个watcher到队列中，并且标记为已经注册
+
+      queue.push(watcher);
+      nextTick(flushSchedulerQueue); // flushSchedulerQueue 调用渲染watcher
+    }
+  }
+  var callbacks = []; // [flushSchedulerQueue,fn]
+
+  var pending = false;
+
+  function flushCallbacksQueue() {
+    callbacks.forEach(function (fn) {
+      return fn();
+    });
+    pending = false;
+  }
+
+  function nextTick(fn) {
+    callbacks.push(fn); // 防抖
+
+    if (!pending) {
+      // true  事件环的概念 promise mutationObserver setTimeout setImmediate
+      setTimeout(function () {
+        flushCallbacksQueue();
+      }, 0);
+      pending = true;
+    }
+  }
+
+  var id = 0; // 做一个watcher 的id 每次创建watcher时 都有一个序号 
+  // 目前写到这里 只有一个watcher 渲染watchrer，只要视图中使用到了这个属性，而且属性变化了就要更新视图
+
+  var Watcher = /*#__PURE__*/function () {
+    function Watcher(vm, exprOrFn, cb, options) {
+      _classCallCheck(this, Watcher);
+
+      this.vm = vm;
+      this.exprOrFn = exprOrFn;
+      this.cb = cb;
+      this.options = options;
+      this.deps = [];
+      this.depsId = new set();
+
+      if (typeof exprOrFn === 'function') {
+        this.getter = exprOrFn;
+      }
+
+      this.id = id++;
+      this.get();
+    }
+
+    _createClass(Watcher, [{
+      key: "run",
+      value: function run() {
+        this.get();
+      }
+    }, {
+      key: "get",
+      value: function get() {
+        pushTarget(this);
+        this.getter();
+        popTarget();
+      }
+    }, {
+      key: "addDep",
+      value: function addDep(dep) {
+        var id = dep.id;
+
+        if (!this.depsId.has(id)) {
+          this.depsId.add(id);
+          this.deps.push(dep);
+          dep.addSub(this);
+        }
+      }
+    }, {
+      key: "update",
+      value: function update() {
+        queueWatcher(this);
+      }
+    }]);
+
+    return Watcher;
+  }();
+
+  var id$1 = 0;
+
+  var Dep = /*#__PURE__*/function () {
+    function Dep() {
+      _classCallCheck(this, Dep);
+
+      this.id = id$1++;
+      this.subs = [];
+    }
+
+    _createClass(Dep, [{
+      key: "depend",
+      value: function depend() {
+        Dep.target.addDep(this);
+      }
+    }, {
+      key: "addSub",
+      value: function addSub(watcher) {
+        this.subs.push(watcher);
+      }
+    }, {
+      key: "notify",
+      value: function notify() {
+        this.subs.forEach(function (watcher) {
+          return watcher.update();
+        });
+      }
+    }]);
+
+    return Dep;
+  }();
+
+  Dep.target = null;
+  var stack = [];
+  function pushTarget(watcher) {
+    Dep.target = watcher;
+    stack.push(watcher);
+  }
+  function popTarget() {
+    stack.pop();
+    Dep.target = stack[stack.length - 1];
+  }
+
   /**
    * 为什么vue用function 这里用class? 
    * 因为 Function构造函数方便扩展原型上的属性和方法, 这里不需要
@@ -214,16 +358,25 @@
   function defineReactive(data, key, value) {
     observe(value); // value可能还是一个对象 递归循环检测一下
 
+    var dep = new Dep();
     Object.defineProperty(data, key, {
       get: function get() {
-        console.log('对象的get方法');
+        console.log('对象的get方法'); // 用户取值的时候 会触发get 给这个属性添加一个dep属性， 让这个dep去收集watcher
+        // 每个属性都有一个自己的dep
+
+        if (Dep.target) {
+          dep.depend();
+        }
+
         return value;
       },
       set: function set(newVal) {
         if (newVal === value) return;
         observe(newVal);
         value = newVal;
-        console.log('对象的set方法');
+        console.log('对象的set方法'); // 当数据更新后 执行当前dep对应的watcher  
+
+        dep.notify();
       }
     });
   }
@@ -539,110 +692,6 @@
     // 3.通过ast产生的语法树 生成 代码 =》 render函数  codegen
   }
 
-  var has = {}; // vue源码里有的时候去重用的是set 有的时候用的是对象来实现的去重
-
-  var queue = []; // 这个队列是否正在等待更新
-
-  function flushSchedulerQueue() {
-    for (var i = 0; i < queue.length; i++) {
-      queue[i].run();
-    }
-
-    queue = [];
-    has = {};
-  }
-
-  function queueWatcher(watcher) {
-    var id = watcher.id;
-
-    if (has[id] == null) {
-      has[id] = true; // 如果没有注册过这个watcher，就注册这个watcher到队列中，并且标记为已经注册
-
-      queue.push(watcher);
-      nextTick(flushSchedulerQueue); // flushSchedulerQueue 调用渲染watcher
-    }
-  }
-  var callbacks = []; // [flushSchedulerQueue,fn]
-
-  var pending = false;
-
-  function flushCallbacksQueue() {
-    callbacks.forEach(function (fn) {
-      return fn();
-    });
-    pending = false;
-  }
-
-  function nextTick(fn) {
-    callbacks.push(fn); // 防抖
-
-    if (!pending) {
-      // true  事件环的概念 promise mutationObserver setTimeout setImmediate
-      setTimeout(function () {
-        flushCallbacksQueue();
-      }, 0);
-      pending = true;
-    }
-  }
-
-  var id = 0; // 做一个watcher 的id 每次创建watcher时 都有一个序号 
-  // 目前写到这里 只有一个watcher 渲染watchrer，只要视图中使用到了这个属性，而且属性变化了就要更新视图
-
-  var Watcher = /*#__PURE__*/function () {
-    function Watcher(vm, exprOrFn, cb, options) {
-      _classCallCheck(this, Watcher);
-
-      this.vm = vm;
-      this.exprOrFn = exprOrFn;
-      this.cb = cb;
-      this.options = options;
-      this.deps = []; // 这个watcher会存放所有的dep
-
-      this.depsId = new Set();
-
-      if (typeof exprOrFn == 'function') {
-        this.getter = exprOrFn;
-      }
-
-      this.id = id++;
-      this.get();
-    }
-
-    _createClass(Watcher, [{
-      key: "run",
-      value: function run() {
-        this.get(); // 重新渲染
-      }
-    }, {
-      key: "get",
-      value: function get() {
-
-        this.getter(); // 这句话就实现了视图的渲染  -》 操作是取值 
-        // Vue是组件级别更新的
-      }
-    }, {
-      key: "addDep",
-      value: function addDep(dep) {
-        var id = dep.id;
-
-        if (!this.depsId.has(id)) {
-          this.depsId.add(id);
-          this.deps.push(dep);
-          dep.addSub(this); // 让当前dep 订阅这个watcher
-        }
-      }
-    }, {
-      key: "update",
-      value: function update() {
-        // 更新原理
-        queueWatcher(this); // 将watcher存储起来
-        // this.get();  // 以前调用get方法是直接更新视图
-      }
-    }]);
-
-    return Watcher;
-  }();
-
   function patch(oldVnode, newVnode) {
     var isRealElement = oldVnode.nodeType;
 
@@ -811,7 +860,6 @@
       }
     } // 没有key 就直接比较类型，如果类型一样就复用 （隐藏的问题是儿子可能都需要重新创建）
     // 循环时尽量采用唯一的标识 作为key 如果用索引（例如倒叙 会采用索引来复用，不够准确） 如果是静态数据 （你爱用啥用啥）
-    // 下周六 开班第一天 
 
   }
 
@@ -879,9 +927,8 @@
 
   function lifeCycleMixin(Vue) {
     Vue.prototype._update = function (vnode) {
-      var vm = this; // 将虚拟节点 变成 真实节点 替换掉$el
-      // 后续 dom diff 也会执行此方法
-
+      // 传入vnode 得到真实dom  挂在vm.$el 上
+      var vm = this;
       vm.$el = patch(vm.$el, vnode);
     };
   }
