@@ -12,8 +12,9 @@
 </html>
 
 <script>
+    // Vue.set Vue.delete  vue构造函数上会这样挂载静态方法 实例是拿不到的 
    
-    const app = new Vue({
+    let app = new Vue({
         // 数据会被观测 响应式数据: 更改数据 视图变化
         // 对 对象的所有属性 使用definePrototype 进行自定义 get set
         el: '#app',
@@ -24,5 +25,9 @@
     })
     app.msg = 100
     app.list.push(4)
-    console.log(typeof document.querySelector('#app'));
+    // console.log(typeof document.querySelector('#app'));
+
+    const fun = config => () => `funcB run config is ${config}`
+    console.log(fun(666)());
+
 </script>

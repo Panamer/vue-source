@@ -16,9 +16,9 @@ function Vue(options) {
 // 所以使用混入 更好 通过mixin引入
 
 // 在原型上添加属性或方法
-initMixin(Vue)
-renderMixin(Vue)
-lifeCycleMixin(Vue)
+initMixin(Vue)  // initState $mount 
+renderMixin(Vue)    // vm._render
+lifeCycleMixin(Vue) // _update
 
 
 
