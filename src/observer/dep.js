@@ -17,6 +17,9 @@ class Dep{
     addSub(watcher){
         this.subs.push(watcher)
     }
+    notify(){
+        this.subs.forEach(watcher => watcher.update())
+    }
 }
 // 初始化是null
 Dep.target = null;

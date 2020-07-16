@@ -176,6 +176,13 @@
       value: function addSub(watcher) {
         this.subs.push(watcher);
       }
+    }, {
+      key: "notify",
+      value: function notify() {
+        this.subs.forEach(function (watcher) {
+          return watcher.update();
+        });
+      }
     }]);
 
     return Dep;
@@ -629,7 +636,7 @@
   }
 
   function nextTick(fn) {
-    callbacks.push(fn); // 防抖
+    callbacks.push(fn); // 函数防抖
 
     if (!pending) {
       // true  事件环的概念 promise mutationObserver setTimeout setImmediate
