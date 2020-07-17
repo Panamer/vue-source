@@ -69,8 +69,9 @@ function defineReactive(data, key, value) {
             console.log('observe的返回值', childOb, key, value);
             if (Dep.target) {
                 dep.depend()  // 收集对象依赖
+                // 这里不管对象还是数组 childOb都存在, 所以当value是对象时 依赖也会被childOb.dep 收集  但是不会被notify
                 if(childOb){ 
-                    childOb.dep.depend(); // 收集数组依赖
+                    childOb.dep.depend(); // 收集数组、对象依赖
                     if(Array.isArray(value)){ // 如果内部还是数组
                         dependArray(value);// 不停的进行依赖收集
                     }

@@ -25,7 +25,7 @@
         el: '#app',
         data: {
             msg: 1,
-            list: [1, 2, 3]
+            list: { a: 3 }
         }
     })
     // app.msg = 100
@@ -48,7 +48,7 @@
     const dedouble = {
         count: 2,
         pro: {
-            count:3,
+            count: 3,
             getPro: () => {
                 console.log(`thia.count === ${this.count}`)
                 console.log(this)
