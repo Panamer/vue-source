@@ -1,33 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <script src="../dist/vue.js"></script>
-    <div id="app"> {{msg}}</div>
+    <div id="app"> {{msg}}
+        <p>{{list}}</p>
+    </div>
 </body>
+
 </html>
 
 <script>
     // Vue.set Vue.delete  vue构造函数上会这样挂载静态方法 实例是拿不到的 
-   
+
     let app = new Vue({
         // 数据会被观测 响应式数据: 更改数据 视图变化
         // 对 对象的所有属性 使用definePrototype 进行自定义 get set
         el: '#app',
         data: {
             msg: 1,
-            list: [1,2,3]
+            list: [1, 2, 3]
         }
     })
-    app.msg = 100
-    app.list.push(4)
+    // app.msg = 100
+    // app.list.push(4)
     // console.log(typeof document.querySelector('#app'));
 
     const fun = config => () => `this is function cuarry ${config}`
-    console.log(fun(666)());
+    // console.log(fun(666)());
 
+    /**
+     * 1、var count = 1;
+     * 若getPro是箭头函数 结果是 1      this => window
+     * 若getPro是普通函数 结果是 3      this => dedouble.pro
+     * 
+     * 2、let  count = 1;
+     * 若getPro是箭头函数 结果是 undefined      this => window
+     * 若getPro是普通函数 结果是 3              this => dedouble.pro
+    */
+    let count = 1;
+    const dedouble = {
+        count: 2,
+        pro: {
+            count:3,
+            getPro: () => {
+                console.log(`thia.count === ${this.count}`)
+                console.log(this)
+            }
+        }
+    }
+
+    dedouble.pro.getPro()
 </script>

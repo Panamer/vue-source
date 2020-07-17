@@ -57,9 +57,7 @@ class Observe {
 function defineReactive(data, key, value) {
     // 这是个observe实例呀 上面有个dep属性呀
     // 注意啦 数组的dep在Observe类上 是个动态属性  对象的dep在defineReactive里 是局部变量
-    let childOb = observe(value);
-
-    observe(value) // value可能还是一个对象 递归循环检测一下
+    let childOb = observe(value); // value可能还是一个对象 递归循环检测一下
 
     let dep = new Dep();
 
@@ -68,8 +66,9 @@ function defineReactive(data, key, value) {
             console.log('对象的get方法');
             // 用户取值的时候 会触发get 给这个属性添加一个dep属性， 让这个dep去收集watcher
             // 每个属性都有一个自己的dep
+            console.log('observe的返回值', childOb, key, value);
             if (Dep.target) {
-                dep.depend()
+                dep.depend()  // 收集对象依赖
                 if(childOb){ 
                     childOb.dep.depend(); // 收集数组依赖
                     if(Array.isArray(value)){ // 如果内部还是数组
@@ -102,6 +101,7 @@ function dependArray(value) {
 }
 
 export function observe(data) {
+    console.log(data, isObject(data));
     // 如果不是对象 就不用做响应式处理
     if (!isObject(data)) {
         return;
